@@ -4,32 +4,91 @@ import time
 import math
 TILE_SIZE = 40
 
-maze = [
-    "###############",
-    "#.....#.......#",
-    "#.###.#.##..#.#",
-    "#.#...#.#...#.#",
-    "#.#.###.#.###.#",
-    "#.#.....#.....#",
-    "#.#######.#####",
-    "#.............#",
-    "###.###########",
-    "#...#.....#...#",
-    "#.#.#.###.#.#.#",
-    "#.#.#...#.#.#.#",
-    "#.#.###.#.#.#.#",
-    "#.#.....#.....#",
-    "#.#######.#####",
-    "#.............#",
-    "###.###########",
-    "#.....#.....#.#",
-    "#.###.#.##..#.#",
-    "#.#...#.#...#.#",
-    "#.#.###.#.###.#",
-    "#.#.....#.....#",
-    "#.#######.#####",
-    "#.............#",
-    "###############"
+levels = [
+    [
+        "###############",
+        "#.....#.......#",
+        "#.###.#.##..#.#",
+        "#.#...#.#...#.#",
+        "#.#.###.#.###.#",
+        "#.#.....#.....#",
+        "#.#######.#####",
+        "#.............#",
+        "###.###########",
+        "#...#.....#...#",
+        "#.#.#.###.#.#.#",
+        "#.#.#...#.#.#.#",
+        "#.#.###.#.#.#.#",
+        "#.#.....#.....#",
+        "#.#######.#####",
+        "#.............#",
+        "###.###########",
+        "#.....#.....#.#",
+        "#.###.#.##..#.#",
+        "#.#...#.#...#.#",
+        "#.#.###.#.###.#",
+        "#.#.....#.....#",
+        "#.#######.#####",
+        "#.............#",
+        "###############"
+    ],
+ 
+
+    [
+        "###############",
+        "#.............#",
+        "#.###.#.#####.#",
+        "#.#...#.....#.#",
+        "#.#.#######.#.#",
+        "#.#.......#.#.#",
+        "#.#######.#.#.#",
+        "#.......#.#...#",
+        "###.#####.#.###",
+        "#...#.....#...#",
+        "#.#.#.#####.#.#",
+        "#.#.#.....#.#.#",
+        "#.#.#####.#.#.#",
+        "#.#.....#.#...#",
+        "#.#####.#.#####",
+        "#.......#.....#",
+        "###.########..#",
+        "#.....#.....#.#",
+        "#.###.#.###.#.#",
+        "#.#...#...#.#.#",
+        "#.#.###.###.#.#",
+        "#.#.....#.....#",
+        "#.#######.#####",
+        "#.............#",
+        "###############"
+    ],
+
+    [
+        "###############",
+        "#.............#",
+        "#.###########.#",
+        "#.#.........#.#",
+        "#.#.#######.#.#",
+        "#.#.#.....#.#.#",
+        "#...#.###.#...#",
+        "###.#.#.#.#####",
+        "#...#.#.#.....#",
+        "#.###.#.#.###.#",
+        "#.#...#.#...#.#",
+        "#.#.###.###.#.#",
+        "#.#.....#.....#",
+        "#.#####.#####.#",
+        "#.......#.....#",
+        "###.#####.###.#",
+        "#...#.....#...#",
+        "#.#.#.###.#.#.#",
+        "#.#.#...#.#.#.#",
+        "#.#.###.#.#.#.#",
+        "#.#.....#.....#",
+        "#.#######.#####",
+        "#.#######.#####",
+        "#.............#",
+        "###############"
+    ]
 ]
 
 class Player:
@@ -77,7 +136,7 @@ class Ghost:
         self.rect = pygame.Rect(x,y,30,30)
         self.speed = 1
         self.spawn__time = time.time()
-        self.life_time = random.randint(5,7)
+        self.life_time = random.randint(3,5)
 
     def update(self,player):
         dx = player.rect.centerx - self.rect.centerx
@@ -103,9 +162,12 @@ class Game:
         pygame.init()
         self.font = pygame.font.SysFont(None,36)
 
-        self.rows = len(maze)
-        self.cols = max(len(row) for row in maze)
-        self.maze = [row.ljust(self.cols, ' ') for row in maze]
+        self.level_index = 0
+        self.load_level(self.level_index)
+
+        self.rows = len(self.maze)
+        self.cols = max(len(row) for row in self.maze)
+        self.maze = [row.ljust(self.cols, ' ') for row in self.maze]
 
         self.width = 600#
         self.height = 1000#
@@ -130,7 +192,7 @@ class Game:
                 x = col_index * TILE_SIZE
                 y = row_index * TILE_SIZE
                 if cell == "#":
-                    self.walls.append(Wall(x, y, TILE_SIZE))
+                   self.walls.append(Wall(x, y, TILE_SIZE))
                 else:
                     self.free_cells.append((x, y))
 
@@ -144,6 +206,33 @@ class Game:
         for _ in range(7):
             x,y = random.choice(self.free_cells)
             self.coins.append(Coin(x,y))
+
+    def load_level(self,index):
+        self.maze = levels[index]
+        self.coin_count = 0
+        self.walls = []
+        self.free_cells = []
+        self.coins = []
+        self.door = None 
+        self.ghosts = []
+
+        for row_index, row in enumerate(self.maze):#
+            for col_index, cell in enumerate(row):
+                x = col_index * TILE_SIZE
+                y = row_index * TILE_SIZE
+                if cell == "#":
+                    self.walls.append(Wall(x, y, TILE_SIZE))
+                else:
+                    self.free_cells.append((x, y))
+        
+
+        px,py = random.choice(self.free_cells)
+        self.player = Player(px,py)
+
+        for _ in range(7):
+            x,y = random.choice(self.free_cells)
+            self.coins.append(Coin(x,y))
+
 
 
     def run(self):
@@ -192,8 +281,13 @@ class Game:
             self.door = Door(x,y)
 
         if self.door and self.player.rect.colliderect(self.door.rect):
-            self.win = True 
-            self.running =False
+            self.level_index += 1 
+
+            if self.level_index < len(levels):
+                self.load_level(self.level_index)
+            else:
+                self.win = True 
+                self.running =False
 
                 
         keys = pygame.key.get_pressed()
@@ -231,6 +325,11 @@ class Game:
             f"Coins: {self.coin_count}",True, (255,255,255)
         )
         self.screen.blit(text,(10,10))
+
+        level_text = self.font.render(
+            f"Level: {self.level_index + 1}",True, (255,255,255)
+        )
+        self.screen.blit(level_text, (10,40))
 
         if self.win:
             text = self.font.render("GEWONEN!", True, (127,255,212))
