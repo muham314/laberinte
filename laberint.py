@@ -176,6 +176,7 @@ class Game:
         pygame.display.set_caption("Laberint")
         self.clock = pygame.time.Clock()
         self.running = True
+        self.restart_button = pygame.Rect(130,0,40,40)
         self.coin_count = 0
         self.walls = []
         self.free_cells = []
@@ -233,6 +234,10 @@ class Game:
             x,y = random.choice(self.free_cells)
             self.coins.append(Coin(x,y))
 
+    def restart_level(self):
+        self.load_level(self.level_index)
+        
+
 
 
     def run(self):
@@ -251,6 +256,13 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if (self.game_over or self.win) and self.restart_button.collidepoint(event.pos):
+                    if self.game_over or self.win:
+                        self.win = False
+                        self.game_over = False
+                        self.restart_level()
+                    print("die taste ist gedrükt")
     def update(self):
         currect_time = time.time()
 
@@ -330,6 +342,8 @@ class Game:
             f"Level: {self.level_index + 1}",True, (255,255,255)
         )
         self.screen.blit(level_text, (10,40))
+
+        pygame.draw.rect(self.screen, (200,0,0), self.restart_button)
 
         if self.win:
             text = self.font.render("GEWONEN!", True, (127,255,212))
