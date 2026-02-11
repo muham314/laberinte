@@ -257,8 +257,8 @@ class Game:
                 self.running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if (self.game_over or self.win) and self.restart_button.collidepoint(event.pos):
-                    if self.game_over or self.win:
+                if self.restart_button.collidepoint(event.pos):
+                    if self.game_over or self.win or self.running:
                         self.win = False
                         self.game_over = False
                         self.restart_level()
